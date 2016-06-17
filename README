@@ -1,0 +1,19 @@
+This is a .net WPF application that uses a Kinect 360 sensor with 1.7 kinect SDK.
+
+Sensor should be at belly height circa 2-3 meters from player.  
+Player should stay on the left side of the screen.
+  
+To play Press Start
+  Choose your players color using the RGB sliders
+  
+To select level Vocal command : "level one" "level two" "level three"
+To start level hit the circle with the RightHand.
+
+Everytime you bounce the "bullet" back to the enemy and it hits the enemy the score goes up.
+
+To end a level just select a new level.
+
+
+Thanks to: 
+  Andrei Cristian for helping me make the distropian_chase.mp3 soundtrack.
+  Catalin Vasilache for drawing the dummy.png sprite.
