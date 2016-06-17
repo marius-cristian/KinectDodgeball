@@ -39,9 +39,7 @@ namespace KinectWpfDemo
         private SpeechRecognitionEngine speechRecognitionEngine;
         private int spectre=1;
         private int score = 0;
-        private int r, g, b;
-        bool isDrawing = false;
-        bool isSet = true;
+        private int r, g, b;        
         private Point leftHandPoint=new Point();
         private Point leftFootPoint = new Point();
         private Point rightHandPoint=new Point();
@@ -62,7 +60,9 @@ namespace KinectWpfDemo
         bool inLevel = false;
         bool projStatus = false;
         bool levelEnd = true;
-        
+        bool isDrawing = false;
+        bool isSet = true;
+
 
         public MainWindow()
         {
@@ -110,11 +110,7 @@ namespace KinectWpfDemo
             projectile_3.Width = images[3].Width;
             projectile_3.Height = images[3].Height;
 
-            projectiles.Add(projectile_1);
-            projectiles.Add(projectile_2);
-            projectiles.Add(projectile_3);
-
-           
+                   
         }
 
         public void PlayMusic()
@@ -151,34 +147,29 @@ namespace KinectWpfDemo
                                         };
                     sensor = KinectSensor.KinectSensors[0];
                 }
-               
+                //score
+                label2.Content = "Score: " + score.ToString();
+                //soundtrack
                 PlayMusic();
+
                 sensor.Start();
                 ConnectionId.Content = sensor.DeviceConnectionId;
                 //rgb camera detection
-                sensor.ColorStream.Enable();
-
-               // currentShape = MakeRectangle(Colors.HotPink,Shapes.Square);
-               // ImageCanvas.Children.Add(currentShape);
-               
+                sensor.ColorStream.Enable();             
                 sensor.DepthStream.Enable();                
-
                 //skeleton detection
                 sensor.SkeletonStream.Enable();
                 sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
 
-                //score
-                label2.Content = "Score: " + score.ToString();
-
                 sensor.AllFramesReady += sensor_AllFramesReady;
 
+                //MSR
                 recognizer = GetRecognizer();
-
                 speechRecognitionEngine = new SpeechRecognitionEngine(recognizer.Id);
 
+                //defining a grammar
                 var choices = new Choices();
-                choices.Add("level");                
-                
+                choices.Add("level");                               
                 var shapes = new Choices();
                 shapes.Add("one");
                 shapes.Add("two");
@@ -190,11 +181,8 @@ namespace KinectWpfDemo
                 grammarBuilder.Append(shapes);
   
                 var grammar = new Grammar(grammarBuilder);
-
                 speechRecognitionEngine.LoadGrammar(grammar);
-
                 speechRecognitionEngine.SpeechRecognized += SpeechRecognitionEngineOnSpeechRecognized;
-
                 //speech thread
                 var thread = new Thread(StartAudioStream);
                 thread.Start();
@@ -230,12 +218,7 @@ namespace KinectWpfDemo
                 case "level":
                     shapeKind = Shapes.Circle;
                     break;
-                case "green":
-                    shapeColor = Colors.Green;
-                    break;
-                case "blue":
-                    shapeColor = Colors.Blue; 
-                    break;
+               
               
             }
 
@@ -313,7 +296,7 @@ namespace KinectWpfDemo
                 MotionCanvas.Background = new ImageBrush(bitmap);
             }
 
-            //on ImageCanvas changes the layer color / makes everything else black
+            //on ImageCanvas changes the layer color / everything else remains black
             using (var frame = e.OpenDepthImageFrame())
                   {
                       depthImagePixels = new DepthImagePixel[sensor.DepthStream.FramePixelDataLength];
@@ -325,7 +308,7 @@ namespace KinectWpfDemo
                       {
                           Console.WriteLine(ex);
                       }
-                      var colorPixels = new byte[4 * sensor.DepthStream.FramePixelDataLength];// 1byte/pixel
+                      var colorPixels = new byte[4 * sensor.DepthStream.FramePixelDataLength];// 4byte/pixel
            
                       for(int i=0;i<colorPixels.Length;i+=4)
                       {
@@ -425,9 +408,7 @@ namespace KinectWpfDemo
                 var circle = CreateCircle(colorPoint);               
                 LevelStart(colorPoint, circle);
 
-                ProjectileMove();
-               
-                
+                ProjectileMove();                
             }
         }
         //projectile move
@@ -439,7 +420,7 @@ namespace KinectWpfDemo
             try
             {
                 foreach (var proj in projectiles)
-                {
+                {//bullet to canvas margin detection
                     Canvas.SetLeft(proj, relativeProjX);
                     if (relativeProjY < 0 || relativeProjY > ImageCanvas.Height || relativeProjX < 0 || relativeProjX > ImageCanvas.Width)
                     {                        
@@ -491,6 +472,17 @@ namespace KinectWpfDemo
                 projStatus = false;
                 if(level==1)
                 {
+                    try
+                    { 
+                        foreach (var x in projectiles)
+                        {
+                            projectiles.Remove(x);
+                        }
+                    }catch(Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                    projectiles.Add(projectile_1);                    
                     triggers[3].Play();
                     speed = 5;
                     
@@ -502,6 +494,19 @@ namespace KinectWpfDemo
 
                 if (level == 2)
                 {
+                    try
+                    {
+                        foreach (var x in projectiles)
+                        {
+                            projectiles.Remove(x);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                    projectiles.Add(projectile_2);
+                   
                     triggers[4].Play();
                     speed = 10;
                    
@@ -513,6 +518,18 @@ namespace KinectWpfDemo
 
                 if (level == 3)
                 {
+                    try
+                    {
+                        foreach (var x in projectiles)
+                        {
+                            projectiles.Remove(x);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                    projectiles.Add(projectile_3);
                     triggers[5].Play();
                     speed = 15;                   
                     Canvas.SetLeft(projectile_3, projectileX=450);
@@ -529,12 +546,7 @@ namespace KinectWpfDemo
             else
             {
                 projStatus = true;
-            }
-            foreach(var proj in projectiles)
-            {
-               
-            }
-                        
+            }                  
         }
 
         //player to bullet collision method
@@ -618,8 +630,6 @@ namespace KinectWpfDemo
             Canvas.SetLeft(circle, colorPoint.X);
             Canvas.SetTop(circle, colorPoint.Y);
 
-
-
             return circle;
         }
 
@@ -640,8 +650,8 @@ namespace KinectWpfDemo
 
             var random = new Random();
 
-            Canvas.SetLeft(shape, 200);
-            Canvas.SetTop(shape, 70);
+            Canvas.SetLeft(shape, 270);
+            Canvas.SetTop(shape, 140);
             try
             {
                 ImageCanvas.Children.Remove(boss);
@@ -677,7 +687,8 @@ namespace KinectWpfDemo
         {
             var mapper = new CoordinateMapper(sensor);
             var depthPoints = new DepthImagePoint[640 * 480];
-            mapper.MapColorFrameToDepthFrame(ColorImageFormat.RgbResolution640x480Fps30,DepthImageFormat.Resolution640x480Fps30,depthImagePixels,depthPoints);
+            mapper.MapColorFrameToDepthFrame(ColorImageFormat.RgbResolution640x480Fps30,DepthImageFormat.Resolution640x480Fps30,
+                depthImagePixels,depthPoints);
 
             for (int i=0;i<depthPoints.Length;i++)
             {
@@ -685,7 +696,8 @@ namespace KinectWpfDemo
                 if(point.Depth>2000 || KinectSensor.IsKnownPoint(point))
                 {
                     var pixelDataIndex = i * 4;
-                    var max = Math.Max(pixelData[pixelDataIndex], Math.Max(pixelData[pixelDataIndex + 1], pixelData[pixelDataIndex + 2]));
+                    var max = Math.Max(pixelData[pixelDataIndex], Math.Max(pixelData[pixelDataIndex + 1],
+                        pixelData[pixelDataIndex + 2]));
                     pixelData[pixelDataIndex] = max;
                     pixelData[pixelDataIndex + 1] = max;
                     pixelData[pixelDataIndex + 2] = max;
