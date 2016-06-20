@@ -62,7 +62,7 @@ namespace KinectWpfDemo
         bool levelEnd = true;
         bool isDrawing = false;
         bool isSet = true;
-
+        
 
         public MainWindow()
         {
@@ -170,15 +170,15 @@ namespace KinectWpfDemo
                 //defining a grammar
                 var choices = new Choices();
                 choices.Add("level");                               
-                var shapes = new Choices();
-                shapes.Add("one");
-                shapes.Add("two");
-                shapes.Add("three");
+                var number = new Choices();
+                number.Add("one");
+                number.Add("two");
+                number.Add("three");
         
                 //grammar builder;
                 var grammarBuilder = new GrammarBuilder { Culture = recognizer.Culture };               
                 grammarBuilder.Append(choices);
-                grammarBuilder.Append(shapes);
+                grammarBuilder.Append(number);
   
                 var grammar = new Grammar(grammarBuilder);
                 speechRecognitionEngine.LoadGrammar(grammar);
@@ -217,8 +217,7 @@ namespace KinectWpfDemo
             {
                 case "level":
                     shapeKind = Shapes.Circle;
-                    break;
-               
+                    break;              
               
             }
 
@@ -256,7 +255,7 @@ namespace KinectWpfDemo
             isDrawing = false;
             isSet = false;
             ImageCanvas.Children.Add(currentShape);
-            Console.WriteLine("matched:" + e.Result.Text);       
+                 
         }
 
         internal enum Shapes
@@ -673,38 +672,11 @@ namespace KinectWpfDemo
             var pixelData = new byte[frame.PixelDataLength];
             frame.CopyPixelDataTo(pixelData);
 
-            //grayscale alteration start
-            GrayscaleData(pixelData);
-            //grayscale alteration end
-
             var stride = frame.Width * frame.BytesPerPixel;
             var bitmap = BitmapSource.Create(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null, pixelData, stride);
             return bitmap;
         }
-
-        //method that makes background Black on ImageCanvas so it lets only the player Visible
-        private void GrayscaleData(byte[] pixelData)
-        {
-            var mapper = new CoordinateMapper(sensor);
-            var depthPoints = new DepthImagePoint[640 * 480];
-            mapper.MapColorFrameToDepthFrame(ColorImageFormat.RgbResolution640x480Fps30,DepthImageFormat.Resolution640x480Fps30,
-                depthImagePixels,depthPoints);
-
-            for (int i=0;i<depthPoints.Length;i++)
-            {
-                var point = depthPoints[i];
-                if(point.Depth>2000 || KinectSensor.IsKnownPoint(point))
-                {
-                    var pixelDataIndex = i * 4;
-                    var max = Math.Max(pixelData[pixelDataIndex], Math.Max(pixelData[pixelDataIndex + 1],
-                        pixelData[pixelDataIndex + 2]));
-                    pixelData[pixelDataIndex] = max;
-                    pixelData[pixelDataIndex + 1] = max;
-                    pixelData[pixelDataIndex + 2] = max;
-                }
-
-            }
-        }
+       
   
         //player color choosers
         private void color1_Click(object sender, RoutedEventArgs e)
@@ -722,7 +694,7 @@ namespace KinectWpfDemo
             greenSlider.Value = 0;
             blueSlider.Value = 0;
         }
-
+       
         private void color2_Click(object sender, RoutedEventArgs e)
         {
             spectre = 0;
