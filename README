@@ -1,4 +1,4 @@
-This is a .net WPF application that uses a Kinect 360 sensor with 1.7 kinect SDK.
+This is a .net WPF application that uses a Kinect 360 sensor with 1.7 kinect SDK. Based on: Building a real application with kinect by john sonmez
 
 Sensor should be at belly height circa 2-3 meters from player.  
 Player should stay on the left side of the screen.
